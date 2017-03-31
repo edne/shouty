@@ -3,6 +3,33 @@ from sys import argv
 import ctypes
 import ctypes.util
 
+# shout.h enums:
+SHOUTERR_SUCCESS = 0
+SHOUTERR_INSANE = -1
+SHOUTERR_NOCONNECT = -2
+SHOUTERR_NOLOGIN = -3
+SHOUTERR_SOCKET = -4
+SHOUTERR_MALLOC = -5
+SHOUTERR_METADATA = -6
+SHOUTERR_CONNECTED = -7
+SHOUTERR_UNCONNECTED = -8
+SHOUTERR_UNSUPPORTED = -9
+SHOUTERR_BUSY = 10
+SHOUTERR_NOTLS = 11
+SHOUTERR_TLSBADCERT = -12
+SHOUTERR_RETRY = -13
+
+SHOUT_FORMAT_OGG = 0
+SHOUT_FORMAT_MP3 = 1
+SHOUT_FORMAT_WEBM = 2
+SHOUT_FORMAT_WEBMAUDIO = 3
+
+SHOUT_PROTOCOL_HTTP = 0
+SHOUT_PROTOCOL_XAUDIOCAST = 1
+SHOUT_PROTOCOL_ICY = 2
+SHOUT_PROTOCOL_ROARAUDIO = 3
+#
+
 so_file = ctypes.util.find_library('shout')
 
 if not so_file:
@@ -33,19 +60,9 @@ lib.shout_set_user(obj, b'source')
 lib.shout_set_password.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 lib.shout_set_password(obj, b'hackme')
 
-SHOUT_PROTOCOL_HTTP = 0
-SHOUT_PROTOCOL_XAUDIOCAST = 1
-SHOUT_PROTOCOL_ICY = 2
-SHOUT_PROTOCOL_ROARAUDIO = 3
-
 # protocol - default http
 lib.shout_set_protocol.argtypes = [ctypes.c_void_p, ctypes.c_int]
 lib.shout_set_protocol(obj, SHOUT_PROTOCOL_HTTP)
-
-SHOUT_FORMAT_OGG = 0
-SHOUT_FORMAT_MP3 = 1
-SHOUT_FORMAT_WEBM = 2
-SHOUT_FORMAT_WEBMAUDIO = 3
 
 # format - default ogg
 lib.shout_set_format.argtypes = [ctypes.c_void_p, ctypes.c_int]
