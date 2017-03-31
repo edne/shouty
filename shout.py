@@ -39,12 +39,16 @@ if not so_file:
 
 def set_string(obj, f, s):
     f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-    f(obj, s.encode('ascii'))
+    err = f(obj, s.encode('ascii'))
+    if err != SHOUTERR_SUCCESS:
+        raise Exception('Failed set_string, error: ' + str(err))
 
 
 def set_int(obj, f, n):
     f.argtypes = [ctypes.c_void_p, ctypes.c_int]
-    f(obj, n)
+    err = f(obj, n)
+    if err != SHOUTERR_SUCCESS:
+        raise Exception('Failed set_int, error: ' + str(err))
 
 
 lib = ctypes.CDLL(so_file)
@@ -53,6 +57,9 @@ lib.shout_init()
 
 lib.shout_new.restype = ctypes.c_void_p
 obj = lib.shout_new()
+if not obj:
+    raise Exception('Memory error')
+
 
 set_string(obj, lib.shout_set_host, 'localhost')
 set_int(obj, lib.shout_set_port, 8000)
@@ -74,9 +81,9 @@ set_string(obj, lib.shout_set_mount, '/shouty')
 # audio_info
 
 lib.shout_open.argtypes = [ctypes.c_void_p]
-lib.shout_open(obj)
-# TODO: get error code
-
+err = lib.shout_open(obj)
+if err != SHOUTERR_SUCCESS:
+    raise Exception('Failed shout_open, error: ' + str(err))
 
 lib.shout_send.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_size_t]
 lib.shout_sync.argtypes = [ctypes.c_void_p]
@@ -90,10 +97,17 @@ for file_name in argv[1:]:
             if not chunk:
                 break
 
-            lib.shout_send(obj, chunk, len(chunk))
-            lib.shout_sync(obj)
+            err = lib.shout_send(obj, chunk, len(chunk))
+            if err != SHOUTERR_SUCCESS:
+                raise Exception('Failed shout_send, error: ' + str(err))
 
-        lib.shout_close(obj)
+            err = lib.shout_sync(obj)
+            if err != SHOUTERR_SUCCESS:
+                raise Exception('Failed shout_sync, error: ' + str(err))
+
+        err = lib.shout_close(obj)
+        if err != SHOUTERR_SUCCESS:
+            raise Exception('Failed shout_close, error: ' + str(err))
 
 lib.shout_free.argtypes = [ctypes.c_void_p]
 lib.shout_free(obj)
