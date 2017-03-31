@@ -36,6 +36,17 @@ if not so_file:
     # TODO raise something
     pass
 
+
+def set_string(obj, f, s):
+    f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+    f(obj, s.encode('ascii'))
+
+
+def set_int(obj, f, n):
+    f.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    f(obj, n)
+
+
 lib = ctypes.CDLL(so_file)
 
 lib.shout_init()
@@ -43,34 +54,13 @@ lib.shout_init()
 lib.shout_new.restype = ctypes.c_void_p
 obj = lib.shout_new()
 
-# host - default localhost
-host = 'localhost'
-lib.shout_set_host.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-lib.shout_set_host(obj, host.encode('ascii'))
-
-# port - default 8000
-lib.shout_set_port.argtypes = [ctypes.c_void_p, ctypes.c_int]
-lib.shout_set_port(obj, 8000)
-
-# user - default source
-lib.shout_set_user.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-lib.shout_set_user(obj, b'source')
-
-# password - NO default, must be set
-lib.shout_set_password.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-lib.shout_set_password(obj, b'hackme')
-
-# protocol - default http
-lib.shout_set_protocol.argtypes = [ctypes.c_void_p, ctypes.c_int]
-lib.shout_set_protocol(obj, SHOUT_PROTOCOL_HTTP)
-
-# format - default ogg
-lib.shout_set_format.argtypes = [ctypes.c_void_p, ctypes.c_int]
-lib.shout_set_format(obj, SHOUT_FORMAT_MP3)
-
-# mount - SHOUT_PROTOCOL_ICY doesn't support it
-lib.shout_set_mount.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-lib.shout_set_mount(obj, b'/shouty')
+set_string(obj, lib.shout_set_host, 'localhost')
+set_int(obj, lib.shout_set_port, 8000)
+set_string(obj, lib.shout_set_user, 'source')
+set_string(obj, lib.shout_set_password, 'hackme')
+set_int(obj, lib.shout_set_protocol, SHOUT_PROTOCOL_HTTP)
+set_int(obj, lib.shout_set_format, SHOUT_FORMAT_MP3)
+set_string(obj, lib.shout_set_mount, '/shouty')
 
 # dumpfile
 # agent
