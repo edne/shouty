@@ -69,6 +69,9 @@ lib.shout_set_format.argtypes = [ctypes.c_void_p, ctypes.c_int]
 lib.shout_set_format(obj, SHOUT_FORMAT_MP3)
 
 # mount - SHOUT_PROTOCOL_ICY doesn't support it
+lib.shout_set_mount.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+lib.shout_set_mount(obj, b'/shouty')
+
 # dumpfile
 # agent
 
