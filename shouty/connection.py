@@ -1,39 +1,7 @@
-from contextlib import contextmanager
-from enum import IntEnum
 import atexit
 import ctypes.util
 from ctypes import CDLL, c_int, c_char_p, c_void_p, c_size_t
-
-
-class ShoutErr(IntEnum):
-    SUCCESS = 0
-    INSANE = -1
-    NOCONNECT = -2
-    NOLOGIN = -3
-    SOCKET = -4
-    MALLOC = -5
-    METADATA = -6
-    CONNECTED = -7
-    UNCONNECTED = -8
-    UNSUPPORTED = -9
-    BUSY = 10
-    NOTLS = 11
-    TLSBADCERT = -12
-    RETRY = -13
-
-
-class Format(IntEnum):
-    OGG = 0
-    MP3 = 1
-    WEBM = 2
-    WEBMAUDIO = 3
-
-
-class Protocol(IntEnum):
-    HTTP = 0
-    XAUDIOCAST = 1
-    ICY = 2
-    ROARAUDIO = 3
+from .enums import ShoutErr, Format, Protocol
 
 
 so_file = ctypes.util.find_library('shout')
@@ -147,12 +115,3 @@ class Connection:
 
     def free(self):
         lib.shout_free(self.obj)
-
-
-@contextmanager
-def connect(**kwargs):
-    cn = Connection(**kwargs)
-    cn.open()
-    yield cn
-    cn.close()
-    cn.free()
