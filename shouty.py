@@ -1,34 +1,40 @@
 from contextlib import contextmanager
+from enum import IntEnum
 import atexit
 import ctypes.util
 from ctypes import CDLL, c_int, c_char_p, c_void_p, c_size_t
 
-# shout.h enums:
-SHOUTERR_SUCCESS = 0
-SHOUTERR_INSANE = -1
-SHOUTERR_NOCONNECT = -2
-SHOUTERR_NOLOGIN = -3
-SHOUTERR_SOCKET = -4
-SHOUTERR_MALLOC = -5
-SHOUTERR_METADATA = -6
-SHOUTERR_CONNECTED = -7
-SHOUTERR_UNCONNECTED = -8
-SHOUTERR_UNSUPPORTED = -9
-SHOUTERR_BUSY = 10
-SHOUTERR_NOTLS = 11
-SHOUTERR_TLSBADCERT = -12
-SHOUTERR_RETRY = -13
 
-SHOUT_FORMAT_OGG = 0
-SHOUT_FORMAT_MP3 = 1
-SHOUT_FORMAT_WEBM = 2
-SHOUT_FORMAT_WEBMAUDIO = 3
+class ShoutErr(IntEnum):
+    SUCCESS = 0
+    INSANE = -1
+    NOCONNECT = -2
+    NOLOGIN = -3
+    SOCKET = -4
+    MALLOC = -5
+    METADATA = -6
+    CONNECTED = -7
+    UNCONNECTED = -8
+    UNSUPPORTED = -9
+    BUSY = 10
+    NOTLS = 11
+    TLSBADCERT = -12
+    RETRY = -13
 
-SHOUT_PROTOCOL_HTTP = 0
-SHOUT_PROTOCOL_XAUDIOCAST = 1
-SHOUT_PROTOCOL_ICY = 2
-SHOUT_PROTOCOL_ROARAUDIO = 3
-#
+
+class Format(IntEnum):
+    OGG = 0
+    MP3 = 1
+    WEBM = 2
+    WEBMAUDIO = 3
+
+
+class Protocol(IntEnum):
+    HTTP = 0
+    XAUDIOCAST = 1
+    ICY = 2
+    ROARAUDIO = 3
+
 
 so_file = ctypes.util.find_library('shout')
 
@@ -59,8 +65,8 @@ class Connection:
     def set_params(self,
                    host='localhost', port=8000,
                    user='source', password='',
-                   protocol=SHOUT_PROTOCOL_HTTP,
-                   format=SHOUT_FORMAT_OGG,
+                   protocol=Protocol.HTTP,
+                   format=Format.OGG,
                    mount='/shouty',
                    dumpfile=None, agent=None,
                    public=0,
@@ -91,14 +97,14 @@ class Connection:
     def set_str(self, f, s):
         f.argtypes = [c_void_p, c_char_p]
         err = f(self.obj, s.encode('ascii'))
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed set_str, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed set_str, error: ' + ShoutErr(err).name)
 
     def set_int(self, f, n):
         f.argtypes = [c_void_p, c_int]
         err = f(self.obj, n)
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed set_int, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed set_int, error: ' + ShoutErr(err).name)
 
     def set_optional_str(self, f, s):
         if s:
@@ -106,23 +112,23 @@ class Connection:
 
     def open(self):
         err = lib.shout_open(self.obj)
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed shout_open, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed shout_open, error: ' + ShoutErr(err).name)
 
     def send(self, chunk):
         err = lib.shout_send(self.obj, chunk, len(chunk))
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed shout_send, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed shout_send, error: ' + ShoutErr(err).name)
 
     def sync(self):
         err = lib.shout_sync(self.obj)
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed shout_sync, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed shout_sync, error: ' + ShoutErr(err).name)
 
     def close(self):
         err = lib.shout_close(self.obj)
-        if err != SHOUTERR_SUCCESS:
-            raise Exception('Failed shout_close, error: ' + str(err))
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed shout_close, error: ' + ShoutErr(err).name)
 
     def send_file(self, file_name):
         print(file_name)

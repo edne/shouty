@@ -6,7 +6,7 @@ import shouty
 params = {
     'user': 'source',
     'password': 'hackme',
-    'format': shouty.SHOUT_FORMAT_MP3,
+    'format': shouty.Format.MP3,
     'mount': '/shouty'
 }
 
