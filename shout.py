@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from contextlib import contextmanager
+import atexit
 from sys import argv
 import ctypes
 import ctypes.util
@@ -53,8 +54,8 @@ def set_int(obj, f, n):
 
 
 lib = ctypes.CDLL(so_file)
-
 lib.shout_init()
+atexit.register(lib.shout_shutdown)
 
 
 class Shout:
@@ -150,5 +151,3 @@ try:
             shout.send_file(file_name)
 except KeyboardInterrupt:
     print()
-
-lib.shout_shutdown()
