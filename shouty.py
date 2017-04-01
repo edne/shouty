@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 import atexit
-import ctypes
 import ctypes.util
+from ctypes import CDLL, c_int, c_char_p, c_void_p, c_size_t
 
 # shout.h enums:
 SHOUTERR_SUCCESS = 0
@@ -35,7 +35,7 @@ so_file = ctypes.util.find_library('shout')
 if not so_file:
     raise Exception('Library shout not found')
 
-lib = ctypes.CDLL(so_file)
+lib = CDLL(so_file)
 lib.shout_init()
 atexit.register(lib.shout_shutdown)
 
@@ -43,20 +43,18 @@ atexit.register(lib.shout_shutdown)
 class Connection:
     def __init__(self, **kwargs):
 
-        lib.shout_new.restype = ctypes.c_void_p
+        lib.shout_new.restype = c_void_p
         self.obj = lib.shout_new()
         if not self.obj:
             raise Exception('Memory error')
 
         self.set_params(**kwargs)
 
-        lib.shout_open.argtypes = [ctypes.c_void_p]
-        lib.shout_send.argtypes = [ctypes.c_void_p,
-                                   ctypes.c_char_p,
-                                   ctypes.c_size_t]
-        lib.shout_sync.argtypes = [ctypes.c_void_p]
-        lib.shout_close.argtypes = [ctypes.c_void_p]
-        lib.shout_free.argtypes = [ctypes.c_void_p]
+        lib.shout_open.argtypes = [c_void_p]
+        lib.shout_send.argtypes = [c_void_p, c_char_p, c_size_t]
+        lib.shout_sync.argtypes = [c_void_p]
+        lib.shout_close.argtypes = [c_void_p]
+        lib.shout_free.argtypes = [c_void_p]
 
     def set_params(self,
                    host='localhost', port=8000,
@@ -91,13 +89,13 @@ class Connection:
         # TODO: audio_info
 
     def set_str(self, f, s):
-        f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        f.argtypes = [c_void_p, c_char_p]
         err = f(self.obj, s.encode('ascii'))
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed set_str, error: ' + str(err))
 
     def set_int(self, f, n):
-        f.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        f.argtypes = [c_void_p, c_int]
         err = f(self.obj, n)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed set_int, error: ' + str(err))
