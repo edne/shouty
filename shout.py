@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from contextlib import contextmanager
 from sys import argv
 import ctypes
 import ctypes.util
@@ -98,6 +99,12 @@ class Shout:
         lib.shout_close.argtypes = [ctypes.c_void_p]
         lib.shout_free.argtypes = [ctypes.c_void_p]
 
+    @contextmanager
+    def connect(self):
+        self.open()
+        yield
+        self.close()
+
     def open(self):
         err = lib.shout_open(self.obj)
         if err != SHOUTERR_SUCCESS:
@@ -133,21 +140,16 @@ def send_file(shout, file_name):
             shout.send(chunk)
             shout.sync()
 
-        shout.close()
-
 
 shout = Shout(user='source', password='hackme',
               format=SHOUT_FORMAT_MP3,
               mount='/shouty')
 
-
-shout.open()
-
 try:
-    for file_name in argv[1:]:
-        send_file(shout, file_name)
+    with shout.connect():
+        for file_name in argv[1:]:
+            send_file(shout, file_name)
 except KeyboardInterrupt:
     print()
-
 
 lib.shout_shutdown()
