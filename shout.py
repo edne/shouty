@@ -98,34 +98,33 @@ class Shout:
 
     def open(self):
         lib.shout_open.argtypes = [ctypes.c_void_p]
-        err = lib.shout_open(obj)
+        err = lib.shout_open(self.obj)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_open, error: ' + str(err))
 
     def send(self, chunk):
-        err = lib.shout_send(obj, chunk, len(chunk))
+        err = lib.shout_send(self.obj, chunk, len(chunk))
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_send, error: ' + str(err))
 
     def sync(self):
-        err = lib.shout_sync(obj)
+        err = lib.shout_sync(self.obj)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_sync, error: ' + str(err))
 
     def close(self):
-        err = lib.shout_close(obj)
+        err = lib.shout_close(self.obj)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_close, error: ' + str(err))
 
     def free(self):
         lib.shout_free.argtypes = [ctypes.c_void_p]
-        lib.shout_free(obj)
+        lib.shout_free(self.obj)
 
 
 shout = Shout(user='source', password='hackme',
               format=SHOUT_FORMAT_MP3,
               mount='/shouty')
-obj = shout.obj
 
 
 shout.open()
