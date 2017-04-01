@@ -41,18 +41,32 @@ atexit.register(lib.shout_shutdown)
 
 
 class Connection:
-    def __init__(self,
-                 host='localhost', port=8000,
-                 user='source', password='',
-                 protocol=SHOUT_PROTOCOL_HTTP,
-                 format=SHOUT_FORMAT_OGG,
-                 mount='/shouty',
-                 dumpfile=None, agent=None):
+    def __init__(self, **kwargs):
 
         lib.shout_new.restype = ctypes.c_void_p
         self.obj = lib.shout_new()
         if not self.obj:
             raise Exception('Memory error')
+
+        self.set_params(**kwargs)
+
+        lib.shout_open.argtypes = [ctypes.c_void_p]
+        lib.shout_send.argtypes = [ctypes.c_void_p,
+                                   ctypes.c_char_p,
+                                   ctypes.c_size_t]
+        lib.shout_sync.argtypes = [ctypes.c_void_p]
+        lib.shout_close.argtypes = [ctypes.c_void_p]
+        lib.shout_free.argtypes = [ctypes.c_void_p]
+
+    def set_params(self,
+                   host='localhost', port=8000,
+                   user='source', password='',
+                   protocol=SHOUT_PROTOCOL_HTTP,
+                   format=SHOUT_FORMAT_OGG,
+                   mount='/shouty',
+                   dumpfile=None, agent=None,
+                   public=0,
+                   name=None, url=None, genre=None, description=None):
 
         self.set_int(lib.shout_set_port, port)
         self.set_str(lib.shout_set_host, host)
@@ -64,27 +78,17 @@ class Connection:
         self.set_int(lib.shout_set_format, format)
         self.set_str(lib.shout_set_mount, mount)
 
-        if dumpfile:
-            self.set_str(lib.shout_set_dumpfile, dumpfile)
+        self.set_optional_str(lib.shout_set_dumpfile, dumpfile)
+        self.set_optional_str(lib.shout_set_agent, agent)
 
-        if agent:
-            self.set_str(lib.shout_set_agent, agent)
+        self.set_int(lib.shout_set_public, public)
 
-        # Directory parameters, all optional:
-        # public
-        # name
-        # url
-        # genre
-        # description
-        # audio_info
+        self.set_optional_str(lib.shout_set_name, name)
+        self.set_optional_str(lib.shout_set_url, url)
+        self.set_optional_str(lib.shout_set_genre, genre)
+        self.set_optional_str(lib.shout_set_description, description)
 
-        lib.shout_open.argtypes = [ctypes.c_void_p]
-        lib.shout_send.argtypes = [ctypes.c_void_p,
-                                   ctypes.c_char_p,
-                                   ctypes.c_size_t]
-        lib.shout_sync.argtypes = [ctypes.c_void_p]
-        lib.shout_close.argtypes = [ctypes.c_void_p]
-        lib.shout_free.argtypes = [ctypes.c_void_p]
+        # TODO: audio_info
 
     def set_str(self, f, s):
         f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
@@ -97,6 +101,10 @@ class Connection:
         err = f(self.obj, n)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed set_int, error: ' + str(err))
+
+    def set_optional_str(self, f, s):
+        if s:
+            self.set_str(f, s)
 
     def open(self):
         err = lib.shout_open(self.obj)
