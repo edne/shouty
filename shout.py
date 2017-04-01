@@ -122,14 +122,7 @@ class Shout:
         lib.shout_free(self.obj)
 
 
-shout = Shout(user='source', password='hackme',
-              format=SHOUT_FORMAT_MP3,
-              mount='/shouty')
-
-
-shout.open()
-
-for file_name in argv[1:]:
+def send_file(shout, file_name):
     print(file_name)
     with open(file_name, 'rb') as f:
         while True:
@@ -141,6 +134,20 @@ for file_name in argv[1:]:
             shout.sync()
 
         shout.close()
+
+
+shout = Shout(user='source', password='hackme',
+              format=SHOUT_FORMAT_MP3,
+              mount='/shouty')
+
+
+shout.open()
+
+try:
+    for file_name in argv[1:]:
+        send_file(shout, file_name)
+except KeyboardInterrupt:
+    print()
 
 shout.free()
 
