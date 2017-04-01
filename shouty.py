@@ -56,7 +56,7 @@ lib.shout_init()
 atexit.register(lib.shout_shutdown)
 
 
-class Shout:
+class Connection:
     def __init__(self,
                  host='localhost', port=8000,
                  user='source', password='',
@@ -98,12 +98,6 @@ class Shout:
         lib.shout_close.argtypes = [ctypes.c_void_p]
         lib.shout_free.argtypes = [ctypes.c_void_p]
 
-    @contextmanager
-    def connect(self):
-        self.open()
-        yield
-        self.close()
-
     def open(self):
         err = lib.shout_open(self.obj)
         if err != SHOUTERR_SUCCESS:
@@ -135,5 +129,14 @@ class Shout:
                 self.send(chunk)
                 self.sync()
 
-    def __del__(self):
+    def free(self):
         lib.shout_free(self.obj)
+
+
+@contextmanager
+def connect(**kwargs):
+    cn = Connection(**kwargs)
+    cn.open()
+    yield cn
+    cn.close()
+    cn.free()
