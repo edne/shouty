@@ -90,14 +90,15 @@ class Shout:
         # description
         # audio_info
 
+        lib.shout_open.argtypes = [ctypes.c_void_p]
         lib.shout_send.argtypes = [ctypes.c_void_p,
                                    ctypes.c_char_p,
                                    ctypes.c_size_t]
         lib.shout_sync.argtypes = [ctypes.c_void_p]
         lib.shout_close.argtypes = [ctypes.c_void_p]
+        lib.shout_free.argtypes = [ctypes.c_void_p]
 
     def open(self):
-        lib.shout_open.argtypes = [ctypes.c_void_p]
         err = lib.shout_open(self.obj)
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_open, error: ' + str(err))
@@ -117,8 +118,7 @@ class Shout:
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_close, error: ' + str(err))
 
-    def free(self):
-        lib.shout_free.argtypes = [ctypes.c_void_p]
+    def __del__(self):
         lib.shout_free(self.obj)
 
 
@@ -149,6 +149,5 @@ try:
 except KeyboardInterrupt:
     print()
 
-shout.free()
 
 lib.shout_shutdown()
