@@ -125,20 +125,19 @@ class Shout:
         if err != SHOUTERR_SUCCESS:
             raise Exception('Failed shout_close, error: ' + str(err))
 
+    def send_file(self, file_name):
+        print(file_name)
+        with open(file_name, 'rb') as f:
+            while True:
+                chunk = f.read(4096)
+                if not chunk:
+                    break
+
+                shout.send(chunk)
+                shout.sync()
+
     def __del__(self):
         lib.shout_free(self.obj)
-
-
-def send_file(shout, file_name):
-    print(file_name)
-    with open(file_name, 'rb') as f:
-        while True:
-            chunk = f.read(4096)
-            if not chunk:
-                break
-
-            shout.send(chunk)
-            shout.sync()
 
 
 shout = Shout(user='source', password='hackme',
@@ -148,7 +147,7 @@ shout = Shout(user='source', password='hackme',
 try:
     with shout.connect():
         for file_name in argv[1:]:
-            send_file(shout, file_name)
+            shout.send_file(file_name)
 except KeyboardInterrupt:
     print()
 
