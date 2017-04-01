@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 from contextlib import contextmanager
 import atexit
-from sys import argv
 import ctypes
 import ctypes.util
 
@@ -134,20 +132,8 @@ class Shout:
                 if not chunk:
                     break
 
-                shout.send(chunk)
-                shout.sync()
+                self.send(chunk)
+                self.sync()
 
     def __del__(self):
         lib.shout_free(self.obj)
-
-
-shout = Shout(user='source', password='hackme',
-              format=SHOUT_FORMAT_MP3,
-              mount='/shouty')
-
-try:
-    with shout.connect():
-        for file_name in argv[1:]:
-            shout.send_file(file_name)
-except KeyboardInterrupt:
-    print()
