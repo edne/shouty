@@ -33,23 +33,7 @@ SHOUT_PROTOCOL_ROARAUDIO = 3
 so_file = ctypes.util.find_library('shout')
 
 if not so_file:
-    # TODO raise something
-    pass
-
-
-def set_string(obj, f, s):
-    f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-    err = f(obj, s.encode('ascii'))
-    if err != SHOUTERR_SUCCESS:
-        raise Exception('Failed set_string, error: ' + str(err))
-
-
-def set_int(obj, f, n):
-    f.argtypes = [ctypes.c_void_p, ctypes.c_int]
-    err = f(obj, n)
-    if err != SHOUTERR_SUCCESS:
-        raise Exception('Failed set_int, error: ' + str(err))
-
+    raise Exception('Library shout not found')
 
 lib = ctypes.CDLL(so_file)
 lib.shout_init()
@@ -62,25 +46,29 @@ class Connection:
                  user='source', password='',
                  protocol=SHOUT_PROTOCOL_HTTP,
                  format=SHOUT_FORMAT_OGG,
-                 mount='/shouty'):
+                 mount='/shouty',
+                 dumpfile=None, agent=None):
 
         lib.shout_new.restype = ctypes.c_void_p
         self.obj = lib.shout_new()
         if not self.obj:
             raise Exception('Memory error')
 
-        set_int(self.obj, lib.shout_set_port, port)
-        set_string(self.obj, lib.shout_set_host, host)
+        self.set_int(lib.shout_set_port, port)
+        self.set_str(lib.shout_set_host, host)
 
-        set_string(self.obj, lib.shout_set_user, user)
-        set_string(self.obj, lib.shout_set_password, password)
+        self.set_str(lib.shout_set_user, user)
+        self.set_str(lib.shout_set_password, password)
 
-        set_int(self.obj, lib.shout_set_protocol, protocol)
-        set_int(self.obj, lib.shout_set_format, format)
-        set_string(self.obj, lib.shout_set_mount, mount)
+        self.set_int(lib.shout_set_protocol, protocol)
+        self.set_int(lib.shout_set_format, format)
+        self.set_str(lib.shout_set_mount, mount)
 
-        # dumpfile
-        # agent
+        if dumpfile:
+            self.set_str(lib.shout_set_dumpfile, dumpfile)
+
+        if agent:
+            self.set_str(lib.shout_set_agent, agent)
 
         # Directory parameters, all optional:
         # public
@@ -97,6 +85,18 @@ class Connection:
         lib.shout_sync.argtypes = [ctypes.c_void_p]
         lib.shout_close.argtypes = [ctypes.c_void_p]
         lib.shout_free.argtypes = [ctypes.c_void_p]
+
+    def set_str(self, f, s):
+        f.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        err = f(self.obj, s.encode('ascii'))
+        if err != SHOUTERR_SUCCESS:
+            raise Exception('Failed set_str, error: ' + str(err))
+
+    def set_int(self, f, n):
+        f.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        err = f(self.obj, n)
+        if err != SHOUTERR_SUCCESS:
+            raise Exception('Failed set_int, error: ' + str(err))
 
     def open(self):
         err = lib.shout_open(self.obj)
