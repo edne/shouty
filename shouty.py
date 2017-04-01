@@ -46,6 +46,16 @@ lib.shout_init()
 atexit.register(lib.shout_shutdown)
 
 
+def check_error_code(f):
+    def decorated(*args, **kwargs):
+        err = f(*args, **kwargs)
+
+        if err != ShoutErr.SUCCESS:
+            raise Exception('Failed {}, error: {}'
+                            .format(f.__name__, ShoutErr(err).name))
+    return decorated
+
+
 class Connection:
     def __init__(self, **kwargs):
 
@@ -94,41 +104,35 @@ class Connection:
 
         # TODO: audio_info
 
+    @check_error_code
     def set_str(self, f, s):
         f.argtypes = [c_void_p, c_char_p]
-        err = f(self.obj, s.encode('ascii'))
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed set_str, error: ' + ShoutErr(err).name)
+        return f(self.obj, s.encode('ascii'))
 
+    @check_error_code
     def set_int(self, f, n):
         f.argtypes = [c_void_p, c_int]
-        err = f(self.obj, n)
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed set_int, error: ' + ShoutErr(err).name)
+        return f(self.obj, n)
 
     def set_optional_str(self, f, s):
         if s:
             self.set_str(f, s)
 
+    @check_error_code
     def open(self):
-        err = lib.shout_open(self.obj)
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed shout_open, error: ' + ShoutErr(err).name)
+        return lib.shout_open(self.obj)
 
+    @check_error_code
     def send(self, chunk):
-        err = lib.shout_send(self.obj, chunk, len(chunk))
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed shout_send, error: ' + ShoutErr(err).name)
+        return lib.shout_send(self.obj, chunk, len(chunk))
 
+    @check_error_code
     def sync(self):
-        err = lib.shout_sync(self.obj)
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed shout_sync, error: ' + ShoutErr(err).name)
+        return lib.shout_sync(self.obj)
 
+    @check_error_code
     def close(self):
-        err = lib.shout_close(self.obj)
-        if err != ShoutErr.SUCCESS:
-            raise Exception('Failed shout_close, error: ' + ShoutErr(err).name)
+        return lib.shout_close(self.obj)
 
     def send_file(self, file_name):
         print(file_name)
