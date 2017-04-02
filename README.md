@@ -5,7 +5,7 @@ Minimal and pythonic wrapper to libshout2.
 
 ## Example
 
-```python3
+```python
 import shouty
 
 params = {
