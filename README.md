@@ -16,5 +16,5 @@ params = {
 }
 
 with shouty.connect('localhost', 8000, **params) as connection:
-    connection.send('file.mp3')
+    connection.send_file('file.mp3')
 ```
