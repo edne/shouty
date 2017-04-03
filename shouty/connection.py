@@ -101,7 +101,6 @@ class Connection:
     def send(self, chunk):
         return lib.shout_send(self.obj, chunk, len(chunk))
 
-    @check_error_code
     def sync(self):
         return lib.shout_sync(self.obj)
 
