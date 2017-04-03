@@ -15,12 +15,19 @@ atexit.register(lib.shout_shutdown)
 
 
 def check_error_code(f):
-    def decorated(*args, **kwargs):
-        err = f(*args, **kwargs)
+    def decorated(self, *args, **kwargs):
+        err = f(self, *args, **kwargs)
 
         if err != ShoutErr.SUCCESS:
-            raise Exception('Failed {}, error: {}'
-                            .format(f.__name__, ShoutErr(err).name))
+            err_name = ShoutErr(err).name
+
+            lib.shout_get_error.restype = c_char_p
+            lib.shout_get_error.argtypes = [c_void_p]
+            err_str = lib.shout_get_error(self.obj).decode()
+
+            raise Exception('Failed {}\nError code: {}\nError description: {}'
+                            .format(f.__name__,
+                                    err_name, err_str))
     return decorated
 
 
