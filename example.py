@@ -4,6 +4,8 @@ import shouty
 
 
 params = {
+    'host': 'localhost',
+    'port': 8000,
     'user': 'source',
     'password': 'hackme',
     'format': shouty.Format.MP3,
