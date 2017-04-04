@@ -55,7 +55,8 @@ class Connection:
                    mount='/shouty',
                    dumpfile=None, agent=None,
                    public=0,
-                   name=None, url=None, genre=None, description=None):
+                   name=None, url=None, genre=None, description=None,
+                   audio_info=None):
 
         self.set_int(lib.shout_set_port, port)
         self.set_str(lib.shout_set_host, host)
@@ -77,7 +78,10 @@ class Connection:
         self.set_optional_str(lib.shout_set_genre, genre)
         self.set_optional_str(lib.shout_set_description, description)
 
-        # TODO: audio_info
+        lib.shout_set_audio_info.argtypes = [c_void_p, c_char_p, c_char_p]
+        if audio_info:
+            for k, v in audio_info.items():
+                self.set_audio_info(k, v)
 
     @check_error_code
     def set_str(self, f, s):
@@ -92,6 +96,12 @@ class Connection:
     def set_optional_str(self, f, s):
         if s:
             self.set_str(f, s)
+
+    @check_error_code
+    def set_audio_info(self, name, value):
+        return lib.shout_set_audio_info(self.obj,
+                                        name.encode('ascii'),
+                                        value.encode('ascii'))
 
     @check_error_code
     def open(self):

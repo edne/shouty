@@ -9,7 +9,10 @@ params = {
     'user': 'source',
     'password': 'hackme',
     'format': shouty.Format.MP3,
-    'mount': '/shouty'
+    'mount': '/shouty',
+    'audio_info': {
+        'channels': '2'
+    }
 }
 
 try:
