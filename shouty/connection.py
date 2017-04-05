@@ -1,8 +1,10 @@
+import logging
 import atexit
 import ctypes.util
 from ctypes import CDLL, c_int, c_char_p, c_void_p, c_size_t
 from .enums import ShoutErr, Format, Protocol
 
+logger = logging.getLogger(__name__)
 
 so_file = ctypes.util.find_library('shout')
 
@@ -33,6 +35,7 @@ def check_error_code(f):
 
 class Connection:
     def __init__(self, **kwargs):
+        logger.debug('Init connection')
 
         lib.shout_new.restype = c_void_p
         self.obj = lib.shout_new()
@@ -105,6 +108,7 @@ class Connection:
 
     @check_error_code
     def open(self):
+        logger.debug('Open connection')
         return lib.shout_open(self.obj)
 
     @check_error_code
@@ -116,10 +120,11 @@ class Connection:
 
     @check_error_code
     def close(self):
+        logger.debug('Close connection')
         return lib.shout_close(self.obj)
 
     def send_file(self, file_name):
-        print(file_name)
+        logger.debug('Sending: ' + file_name)
         with open(file_name, 'rb') as f:
             while True:
                 chunk = f.read(4096)
@@ -130,4 +135,5 @@ class Connection:
                 self.sync()
 
     def free(self):
+        logger.debug('Free library')
         lib.shout_free(self.obj)

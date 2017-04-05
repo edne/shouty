@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from sys import argv
+import logging
 import shouty
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 params = {
