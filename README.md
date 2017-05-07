@@ -9,12 +9,14 @@ Minimal and pythonic wrapper to libshout2.
 import shouty
 
 params = {
+    'host': 'localhost',
+    'port': 8000,
     'user': 'source',
     'password': 'hackme',
     'format': shouty.Format.MP3,
     'mount': '/shouty'
 }
 
-with shouty.connect('localhost', 8000, **params) as connection:
+with shouty.connect(**params) as connection:
     connection.send_file('file.mp3')
 ```
