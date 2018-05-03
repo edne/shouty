@@ -21,6 +21,7 @@ params = {
 try:
     with shouty.connect(**params) as connection:
         for file_name in argv[1:]:
+            connection.set_metadata_song(file_name)
             connection.send_file(file_name)
 except KeyboardInterrupt:
     print()

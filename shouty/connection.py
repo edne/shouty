@@ -106,6 +106,33 @@ class Connection:
                                         name.encode('ascii'),
                                         value.encode('ascii'))
 
+    def metadata_new(self):
+        lib.shout_metadata_new.restype = c_void_p
+        return lib.shout_metadata_new()
+
+    @check_error_code
+    def metadata_free(self, metadata):
+        lib.shout_metadata_free.argtypes = [c_void_p]
+        return lib.shout_metadata_free(metadata)
+
+    @check_error_code
+    def metadata_add(self, metadata, name, value):
+        lib.shout_metadata_add.argtypes = [c_void_p, c_char_p, c_char_p]
+        return lib.shout_metadata_add(metadata,
+                                        name.encode('ascii'),
+                                        value.encode('ascii'))
+
+    @check_error_code
+    def set_metadata(self, metadata):
+        lib.shout_set_metadata.argtypes = [c_void_p, c_void_p]
+        return lib.shout_set_metadata(self.obj, metadata)
+
+    def set_metadata_song(self, songname):
+        metadata = self.metadata_new()
+        self.metadata_add(metadata, "song", songname)
+        self.set_metadata(metadata)
+        self.metadata_free(metadata)
+
     @check_error_code
     def open(self):
         logger.debug('Open connection')
