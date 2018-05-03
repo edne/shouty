@@ -12,8 +12,8 @@ class ShoutErr(IntEnum):
     CONNECTED = -7
     UNCONNECTED = -8
     UNSUPPORTED = -9
-    BUSY = 10
-    NOTLS = 11
+    BUSY = -10
+    NOTLS = -11
     TLSBADCERT = -12
     RETRY = -13
 
