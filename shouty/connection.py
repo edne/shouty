@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 so_file = ctypes.util.find_library('shout')
 
 if not so_file:
-    raise RuntimeException('Library shout not found')
+    raise RuntimeError('Library shout not found')
 
 lib = CDLL(so_file)
 lib.shout_init()
