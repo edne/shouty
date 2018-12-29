@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 so_file = ctypes.util.find_library('shout')
 
 if not so_file:
-    raise Exception('Library shout not found')
+    raise RuntimeException('Library shout not found')
 
 lib = CDLL(so_file)
 lib.shout_init()
@@ -27,7 +27,7 @@ def check_error_code(f):
             lib.shout_get_error.argtypes = [c_void_p]
             err_str = lib.shout_get_error(self.obj).decode()
 
-            raise Exception('Failed {}\nError code: {}\nError description: {}'
+            raise RuntimeError('Failed {}\nError code: {}\nError description: {}'
                             .format(f.__name__,
                                     err_name, err_str))
     return decorated
@@ -40,7 +40,7 @@ class Connection:
         lib.shout_new.restype = c_void_p
         self.obj = lib.shout_new()
         if not self.obj:
-            raise Exception('Memory error')
+            raise MemoryError('Memory error')
 
         self.set_params(**kwargs)
 
